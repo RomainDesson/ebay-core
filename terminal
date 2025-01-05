@@ -26,3 +26,20 @@ railway init
 
 # Déploiement
 railway up 
+
+# Vérifiez que tout est commité
+git add .
+git commit -m "Prepare for production"
+
+# Déployez
+railway up 
+
+# Test de l'endpoint des annonces
+curl https://{RAILWAY_URL}/api/listings
+
+# Si vous n'avez pas encore de token, vous devrez d'abord vous authentifier :
+curl https://{RAILWAY_URL}/auth/ebay/callback?code=votre_code 
+
+railway logs 
+
+curl https://{RAILWAY_URL}/status 

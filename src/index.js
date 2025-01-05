@@ -37,6 +37,36 @@ app.get('/auth/ebay/callback', async (req, res) => {
   }
 });
 
+// Route pour générer l'URL d'authentification
+app.get('/auth/ebay/url', (req, res) => {
+  const authUrl = `https://${ebayService.config.sandbox ? 'auth.sandbox' : 'auth'}.ebay.com/oauth2/authorize`;
+  const params = new URLSearchParams({
+    client_id: ebayService.config.appId,
+    response_type: 'code',
+    redirect_uri: ebayService.config.ruName,
+    scope: ebayService.getRequiredScopes(),
+    prompt: 'login'
+  });
+
+  console.log('Generated Auth URL:', {
+    baseUrl: authUrl,
+    redirectUri: ebayService.config.ruName,
+    scopes: ebayService.getRequiredScopes()
+  });
+
+  res.json({ authUrl: `${authUrl}?${params.toString()}` });
+});
+
+// Ajoutez cet endpoint
+app.get('/status', (req, res) => {
+  res.json({
+    status: 'ok',
+    environment: process.env.EBAY_SANDBOX === 'true' ? 'sandbox' : 'production',
+    hasToken: !!ebayService.accessToken,
+    tokenExpiration: ebayService.tokenExpiration
+  });
+});
+
 app.listen(port, () => {
   console.log(`Serveur démarré sur le port ${port}`);
   console.log(`Endpoint disponible: GET http://localhost:${port}/api/listings`);
