@@ -81,29 +81,38 @@ class EbayService {
       console.log('Début getActiveListings...');
       const token = await this.ensureValidToken();
       
+      if (!this.config.marketplaceId) {
+        throw new Error('MarketplaceId non défini');
+      }
+
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'X-EBAY-C-MARKETPLACE-ID': this.config.marketplaceId
       };
 
-      console.log('Appel API eBay avec:', {
-        url: `${this.baseUrl}/sell/inventory/v1/inventory_item`,
+      console.log('Configuration API eBay:', {
+        url: `${this.baseUrl}/sell/marketplace/v1/item`,
         marketplaceId: this.config.marketplaceId,
-        isSandbox: this.config.sandbox
+        isSandbox: this.config.sandbox,
+        headers: {
+          ...headers,
+          'Authorization': 'Bearer [HIDDEN]'
+        }
       });
 
-      const response = await axios.get(`${this.baseUrl}/sell/inventory/v1/inventory_item`, {
+      const response = await axios.get(`${this.baseUrl}/sell/marketplace/v1/item`, {
         headers,
         params: {
           limit: 100,
-          offset: 0
+          offset: 0,
+          filter: 'status:{ACTIVE}'  // Pour ne récupérer que les annonces actives
         }
       });
       
       console.log('Réponse API eBay:', {
         total: response.data?.total,
-        count: response.data?.inventoryItems?.length,
+        count: response.data?.items?.length,
         data: response.data
       });
 

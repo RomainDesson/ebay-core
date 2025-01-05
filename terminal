@@ -43,3 +43,5 @@ curl https://{RAILWAY_URL}/auth/ebay/callback?code=votre_code
 railway logs 
 
 curl https://{RAILWAY_URL}/status 
+
+curl https://{RAILWAY_URL}/debug/config 
