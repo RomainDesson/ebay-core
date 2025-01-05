@@ -81,6 +81,19 @@ app.get('/status', (req, res) => {
   });
 });
 
+// Endpoint de debug (à retirer en production plus tard)
+app.get('/debug/config', (req, res) => {
+  res.json({
+    environment: process.env.EBAY_SANDBOX === 'true' ? 'sandbox' : 'production',
+    marketplaceId: ebayService.config.marketplaceId,
+    baseUrl: ebayService.baseUrl,
+    hasToken: !!ebayService.accessToken,
+    tokenExpiration: ebayService.tokenExpiration,
+    // Ne pas exposer les clés sensibles en production
+    appIdPrefix: ebayService.config.appId.substring(0, 10) + '...'
+  });
+});
+
 app.listen(port, () => {
   console.log(`Serveur démarré sur le port ${port}`);
   console.log(`Endpoint disponible: GET http://localhost:${port}/api/listings`);

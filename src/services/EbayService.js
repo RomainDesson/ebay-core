@@ -78,6 +78,7 @@ class EbayService {
   // Récupération des annonces
   async getActiveListings() {
     try {
+      console.log('Début getActiveListings...');
       const token = await this.ensureValidToken();
       
       const headers = {
@@ -86,20 +87,39 @@ class EbayService {
         'X-EBAY-C-MARKETPLACE-ID': this.config.marketplaceId
       };
 
+      console.log('Appel API eBay avec:', {
+        url: `${this.baseUrl}/sell/inventory/v1/inventory_item`,
+        marketplaceId: this.config.marketplaceId,
+        isSandbox: this.config.sandbox
+      });
+
       const response = await axios.get(`${this.baseUrl}/sell/inventory/v1/inventory_item`, {
         headers,
         params: {
+          limit: 100,
           offset: 0
         }
       });
       
+      console.log('Réponse API eBay:', {
+        total: response.data?.total,
+        count: response.data?.inventoryItems?.length,
+        data: response.data
+      });
+
       return response.data;
     } catch (error) {
-      console.error('Erreur Listings:', {
+      console.error('Erreur Listings détaillée:', {
         status: error.response?.status,
         statusText: error.response?.statusText,
         data: error.response?.data,
-        url: error.config?.url
+        url: error.config?.url,
+        headers: {
+          ...error.config?.headers,
+          'Authorization': 'Bearer [HIDDEN]'
+        },
+        marketplaceId: this.config.marketplaceId,
+        isSandbox: this.config.sandbox
       });
       throw new Error(`Erreur lors de la récupération des annonces: ${error.message}`);
     }
