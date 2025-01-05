@@ -1,0 +1,28 @@
+npm uninstall ebay-api
+npm install ebay-api@latest 
+npm run dev 
+curl http://localhost:3000/api/account1/inventory 
+
+# Installation de ngrok
+npm install -g ngrok
+
+# Création du tunnel
+ngrok http 3000 
+
+ngrok config add-authtoken <votre_authtoken> 
+
+curl http://localhost:3000/auth/ebay/url 
+
+npm install helmet express-rate-limit 
+
+# Installation de Railway CLI
+npm i -g @railway/cli
+
+# Login
+railway login
+
+# Initialisation du projet
+railway init
+
+# Déploiement
+railway up 
