@@ -104,6 +104,42 @@ class EbayService {
       throw new Error(`Erreur lors de la récupération des annonces: ${error.message}`);
     }
   }
+
+  async getInitialTokens(authorizationCode) {
+    try {
+      const credentials = Buffer.from(`${this.config.appId}:${this.config.certId}`).toString('base64');
+      
+      const response = await axios.post(
+        `${this.baseUrl}/identity/v1/oauth2/token`,
+        `grant_type=authorization_code&code=${authorizationCode}&redirect_uri=${this.config.ruName}`,
+        {
+          headers: {
+            'Authorization': `Basic ${credentials}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      );
+
+      this.accessToken = response.data.access_token;
+      this.refreshToken = response.data.refresh_token;
+      this.tokenExpiration = Date.now() + (response.data.expires_in * 1000) - 300000;
+
+      await tokenStorage.saveTokens(this.config.appId, {
+        accessToken: this.accessToken,
+        refreshToken: this.refreshToken,
+        tokenExpiration: this.tokenExpiration
+      });
+
+      return {
+        accessToken: this.accessToken,
+        refreshToken: this.refreshToken,
+        expiresIn: response.data.expires_in
+      };
+    } catch (error) {
+      console.error('Erreur obtention tokens:', error.response?.data);
+      throw new Error('Impossible d\'obtenir les tokens initiaux');
+    }
+  }
 }
 
 module.exports = EbayService; 
