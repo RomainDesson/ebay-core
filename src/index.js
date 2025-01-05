@@ -39,8 +39,12 @@ app.get('/auth/ebay/callback', async (req, res) => {
 
 // Route pour générer l'URL d'authentification
 app.get('/auth/ebay/url', (req, res) => {
-  const authUrl = `https://${ebayService.config.sandbox ? 'auth.sandbox' : 'auth'}.ebay.com/oauth2/authorize`;
-  const params = new URLSearchParams({
+  // L'URL de base doit être signin.ebay.com
+  const baseSignInUrl = `https://${ebayService.config.sandbox ? 'signin.sandbox' : 'signin'}.ebay.com/SignIn`;
+  
+  // Construire l'URL OAuth qui sera encodée
+  const oauthUrl = `https://${ebayService.config.sandbox ? 'auth.sandbox' : 'auth'}.ebay.com/oauth2/authorize`;
+  const oauthParams = new URLSearchParams({
     client_id: ebayService.config.appId,
     response_type: 'code',
     redirect_uri: ebayService.config.ruName,
@@ -48,13 +52,23 @@ app.get('/auth/ebay/url', (req, res) => {
     prompt: 'login'
   });
 
-  console.log('Generated Auth URL:', {
-    baseUrl: authUrl,
-    redirectUri: ebayService.config.ruName,
-    scopes: ebayService.getRequiredScopes()
+  // Construire l'URL finale
+  const params = new URLSearchParams({
+    ana: 1,
+    ru: `${oauthUrl}?${oauthParams.toString()}`
   });
 
-  res.json({ authUrl: `${authUrl}?${params.toString()}` });
+  const finalUrl = `${baseSignInUrl}?${params.toString()}`;
+
+  console.log('Generated Auth URL:', {
+    baseSignInUrl,
+    oauthUrl,
+    redirectUri: ebayService.config.ruName,
+    scopes: ebayService.getRequiredScopes(),
+    finalUrl
+  });
+
+  res.json({ authUrl: finalUrl });
 });
 
 // Ajoutez cet endpoint
